@@ -18,7 +18,7 @@ func mysql(w http.ResponseWriter, r *http.Request) {
 	password, err := jsonparser.GetString(vcapservices, "p-mysql", "[0]", "credentials", "password")
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", username, password, hostname, database)
 	db, err := sql.Open("mysql", connectionString)
-    err = db.Ping()
+	err = db.Ping()
 	if err != nil {
 	  panic(err.Error()) // proper error handling instead of panic in your app
 	}

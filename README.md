@@ -2,3 +2,15 @@ The goal of this repo is to be a single Golang app that I can use for any learni
 
 ### Golang reminders
 1. Don't modify `go.mod` or `go.sum`. They are modified during build.
+
+
+### Functionality to-do
+* use mysql
+* use redis
+* use rabbitmq
+* log some information
+* output prometheus metrics
+* output TO metrics
+* use kafka
+* web socket
+* tcp socket
