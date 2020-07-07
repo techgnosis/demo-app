@@ -8,7 +8,8 @@ import (
 
 func main() {
 	http.HandleFunc("/env", getEnv)
-	http.HandleFunc("/mysql", mysql)
+	http.HandleFunc("/writeMysql", writeMysql)
+	http.HandleFunc("/readMysql", readMysql)
 	http.HandleFunc("/redis", useRedis)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 

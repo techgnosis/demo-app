@@ -10,13 +10,43 @@ import (
     "os"
 )
 
-func mysql(w http.ResponseWriter, r *http.Request) {
+func getConnectionString() string {
 	vcapservices := []byte(os.Getenv("VCAP_SERVICES"))
-	hostname, err := jsonparser.GetString(vcapservices, "p-mysql", "[0]", "credentials", "hostname")
-	database, err := jsonparser.GetString(vcapservices, "p-mysql", "[0]", "credentials", "name")
-	username, err := jsonparser.GetString(vcapservices, "p-mysql", "[0]", "credentials", "username")
-	password, err := jsonparser.GetString(vcapservices, "p-mysql", "[0]", "credentials", "password")
+	hostname, _ := jsonparser.GetString(vcapservices, "p.mysql", "[0]", "credentials", "hostname")
+	database, _ := jsonparser.GetString(vcapservices, "p.mysql", "[0]", "credentials", "name")
+	username, _ := jsonparser.GetString(vcapservices, "p.mysql", "[0]", "credentials", "username")
+	password, _ := jsonparser.GetString(vcapservices, "p.mysql", "[0]", "credentials", "password")
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", username, password, hostname, database)
+	fmt.Println("connectionString: " + connectionString)
+	return connectionString
+}
+
+func writeMysql(w http.ResponseWriter, r *http.Request) {
+	connectionString := getConnectionString()
+	db, err := sql.Open("mysql", connectionString)
+	if err != nil {
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
+
+	err = db.Ping()
+	if err != nil {
+	  fmt.Println("Ping error")
+	  panic(err.Error()) // proper error handling instead of panic in your app
+	}
+
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS pet ( id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, name VARCHAR(30) NOT NULL)");
+	if err != nil {
+		log.Fatal(err)
+	}
+	
+	_, err = db.Exec("insert into pet (name) values ('bobby the dog')")
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func readMysql(w http.ResponseWriter, r *http.Request) {
+	connectionString := getConnectionString()
 	db, err := sql.Open("mysql", connectionString)
 	err = db.Ping()
 	if err != nil {
@@ -29,16 +59,15 @@ func mysql(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 	var (
+		id int
 		name string
-		owner string
-		species string
 	)
 	for rows.Next() {
-		err := rows.Scan(&name, &owner, &species)
+		err := rows.Scan(&id, &name)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Fprintf(w, name + " " + owner + " " + species + "\n")
+		fmt.Fprintf(w,name + "\n")
 
 	}
 	err = rows.Err()
