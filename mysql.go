@@ -22,34 +22,52 @@ func getConnectionString() string {
 }
 
 func writeMysql(w http.ResponseWriter, r *http.Request) {
-	connectionString := getConnectionString()
-	db, err := sql.Open("mysql", connectionString)
-	if err != nil {
+	switch r.Method {
+	case "POST":
+		if err := r.ParseForm(); err != nil {
+            fmt.Fprintf(w, "ParseForm() err: %v", err)
+            return
+        }
+        petname := r.FormValue("petname")
+		connectionString := getConnectionString()
+		db, err := sql.Open("mysql", connectionString)
+		if err != nil {
+			fmt.Println("sql.Open error")
+			panic(err.Error()) // proper error handling instead of panic in your app
+		}
+
+		err = db.Ping()
+		if err != nil {
+		fmt.Println("db.Ping error")
 		panic(err.Error()) // proper error handling instead of panic in your app
-	}
+		}
 
-	err = db.Ping()
-	if err != nil {
-	  fmt.Println("Ping error")
-	  panic(err.Error()) // proper error handling instead of panic in your app
-	}
-
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS pet ( id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, name VARCHAR(30) NOT NULL)");
-	if err != nil {
-		log.Fatal(err)
+		
+		_, err = db.Exec("CREATE TABLE IF NOT EXISTS pet ( id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, name VARCHAR(30) NOT NULL)");
+		if err != nil {
+			log.Fatal(err)
+		}
+		
+		sql_statement := fmt.Sprintf("insert into pet (name) values ('%s')", petname)
+		_, err = db.Exec(sql_statement)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	
-	_, err = db.Exec("insert into pet (name) values ('bobby the dog')")
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func readMysql(w http.ResponseWriter, r *http.Request) {
 	connectionString := getConnectionString()
 	db, err := sql.Open("mysql", connectionString)
+	if err != nil {
+		fmt.Println("sql.Open error")
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
+
 	err = db.Ping()
 	if err != nil {
+	  fmt.Println("db.Ping error")
 	  panic(err.Error()) // proper error handling instead of panic in your app
 	}
 	
