@@ -8,28 +8,42 @@ import (
 	"os"
 )
 
-func useRedis(w http.ResponseWriter, r *http.Request) {
+func getRedisClient() *redis.Client {
 	vcapservices := []byte(os.Getenv("VCAP_SERVICES"))
-	host, err := jsonparser.GetString(vcapservices, "p-redis", "[0]", "credentials", "host")
-	port, err := jsonparser.GetString(vcapservices, "p-redis", "[0]", "credentials", "port")
-	password, err := jsonparser.GetString(vcapservices, "p-redis", "[0]", "credentials", "password")
-
-
-    client := redis.NewClient(&redis.Options{
-	  Addr:    host +  ":" + port,
-	  Password: password,
-      DB:       0,
+	host, _ := jsonparser.GetString(vcapservices, "p.redis", "[0]", "credentials", "host")
+	port, _ := jsonparser.GetInt(vcapservices, "p.redis", "[0]", "credentials", "port")
+	password, _ := jsonparser.GetString(vcapservices, "p.redis", "[0]", "credentials", "password")
+	fmt.Println("host " + host)
+	fmt.Printf("port %d\n", port)
+	fmt.Println("password " + password)
+	return redis.NewClient(&redis.Options{
+		Addr:    fmt.Sprintf("%s:%d", host, port),
+		Password: password,
+		DB:       0,
 	})
+}
 
-	err = client.Set("pas-test-key", "5", 0).Err()
+func writeRedis(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "POST":
+		if err := r.ParseForm(); err != nil {
+            fmt.Fprintf(w, "ParseForm() err: %v", err)
+            return
+        }
+        petname := r.FormValue("favoritepet")
+		client := getRedisClient()
+		err := client.Set("favorite-pet", petname, 0).Err()
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func readRedis(w http.ResponseWriter, r *http.Request) {
+	client := getRedisClient()
+	value, err := client.Get("favorite-pet").Result()
 	if err != nil {
 		panic(err)
 	}
-
-	_, err = client.Get("pas-test-key").Result()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("derp")
-	fmt.Fprintf(w, "Howdy y'all!")
+	fmt.Fprintf(w, value)
 }

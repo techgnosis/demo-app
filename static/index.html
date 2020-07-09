@@ -41,7 +41,16 @@
 
     <section>
         <h1> Write to Redis</h1>
-        <a href="/redis">Use Redis</a>
+        <form action="/writeRedis" method="post">
+          <label for="favoritepet">Favorite pet:</label><br>
+          <input type="text" id="favoritepet" name="favoritepet"><br>
+          <input type="submit" value="Submit">
+        </form>
+    </section>
+
+    <section>
+      <h1> Read from Redis</h1>
+      <a href="/readRedis">Read the key 'favorite-pet'</a>
     </section>
 
   </main>

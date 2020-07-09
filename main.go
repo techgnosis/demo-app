@@ -12,6 +12,7 @@ func main() {
 	http.HandleFunc("/env", getEnv)
 	http.HandleFunc("/writeMysql", writeMysql)
 	http.HandleFunc("/readMysql", readMysql)
-	http.HandleFunc("/redis", useRedis)
+	http.HandleFunc("/writeRedis", writeRedis)
+	http.HandleFunc("/readRedis", readRedis)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
