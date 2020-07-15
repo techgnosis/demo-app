@@ -7,7 +7,7 @@ import (
 
 
 func main() {
-	// Hello Costco again again
+	// Hello Costco again again again
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/", fs)
 	http.HandleFunc("/env", getEnv)
