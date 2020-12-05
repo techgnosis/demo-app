@@ -1,12 +1,14 @@
 package main
 
 import (
-	"net/http"
+	"fmt"
 	"log"
+	"net/http"
 )
 
 
 func main() {
+	fmt.Println("App launched")
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/", fs)
 	http.HandleFunc("/env", getEnv)
