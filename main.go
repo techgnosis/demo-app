@@ -20,6 +20,7 @@ func main() {
 }
 
 func write(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("write entered")
 	hostname := os.Getenv("DEMO_APP_MYSQL_HOSTNAME")
 	database := os.Getenv("DEMO_APP_MYSQL_DATABASE")
 	username := os.Getenv("DEMO_APP_MYSQL_USERNAME")
