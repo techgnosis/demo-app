@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -12,6 +13,13 @@ import (
 
 func main() {
 	fmt.Println("App launched")
+
+	http.HandleFunc("/write", write)
+	log.Fatal(http.ListenAndServe(":8080", nil))
+
+}
+
+func write(w http.ResponseWriter, r *http.Request) {
 	hostname := os.Getenv("DEMO_APP_MYSQL_HOSTNAME")
 	database := os.Getenv("DEMO_APP_MYSQL_DATABASE")
 	username := os.Getenv("DEMO_APP_MYSQL_USERNAME")
