@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -45,14 +44,12 @@ func write(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	for {
-		time.Sleep(2 * time.Second)
-		fmt.Println("About to write a row")
-		sql_statement := fmt.Sprintf("insert into pet (name) values ('%s')", petname)
-		_, err = db.Exec(sql_statement)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println("wrote a row")
+	fmt.Println("About to write a row")
+	sql_statement := fmt.Sprintf("insert into pet (name) values ('%s')", petname)
+	_, err = db.Exec(sql_statement)
+	if err != nil {
+		log.Fatal(err)
 	}
+	fmt.Println("wrote a row")
+
 }
