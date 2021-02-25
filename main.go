@@ -10,8 +10,23 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+var db *sql.DB
+
 func main() {
 	fmt.Println("App launched")
+
+	hostname := os.Getenv("DEMO_APP_MYSQL_HOSTNAME")
+	database := os.Getenv("DEMO_APP_MYSQL_DATABASE")
+	username := os.Getenv("DEMO_APP_MYSQL_USERNAME")
+	password := os.Getenv("DEMO_APP_MYSQL_PASSWORD")
+	connectionString := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", username, password, hostname, database)
+	fmt.Println("connectionString: " + connectionString)
+	var err error
+	db, err = sql.Open("mysql", connectionString)
+	if err != nil {
+		fmt.Println("sql.Open error")
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
 
 	http.HandleFunc("/write", write)
 	log.Fatal(http.ListenAndServe(":8080", nil))
@@ -20,20 +35,10 @@ func main() {
 
 func write(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("write entered")
-	hostname := os.Getenv("DEMO_APP_MYSQL_HOSTNAME")
-	database := os.Getenv("DEMO_APP_MYSQL_DATABASE")
-	username := os.Getenv("DEMO_APP_MYSQL_USERNAME")
-	password := os.Getenv("DEMO_APP_MYSQL_PASSWORD")
-	connectionString := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", username, password, hostname, database)
-	petname := "puppyface"
-	fmt.Println("connectionString: " + connectionString)
-	db, err := sql.Open("mysql", connectionString)
-	if err != nil {
-		fmt.Println("sql.Open error")
-		panic(err.Error()) // proper error handling instead of panic in your app
-	}
 
-	err = db.Ping()
+	petname := "puppyface"
+
+	err := db.Ping()
 	if err != nil {
 		fmt.Println("db.Ping error")
 		panic(err.Error()) // proper error handling instead of panic in your app
