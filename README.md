@@ -8,9 +8,6 @@ The goal of this repo is to be a single Golang app that I can use for any learni
 * use mysql
 * use redis
 * use rabbitmq
+* use postgres
 * log some information
 * output prometheus metrics
-* output TO metrics
-* use kafka
-* web socket
-* tcp socket
