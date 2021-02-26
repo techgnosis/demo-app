@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"fmt"
 	"log"
@@ -54,11 +55,14 @@ func main() {
 		hostname := os.Getenv("DEMO_APP_REDIS_HOSTNAME")
 		port := os.Getenv("DEMO_APP_REDIS_PORT")
 		password := os.Getenv("DEMO_APP_REDIS_PASSWORD")
-
+		tls_config := &tls.Config{
+			InsecureSkipVerify: true,
+		}
 		redis_client = redis.NewClient(&redis.Options{
-			Addr:     fmt.Sprintf("%s:%s", hostname, port),
-			Password: password,
-			DB:       0,
+			Addr:      fmt.Sprintf("%s:%s", hostname, port),
+			Password:  password,
+			DB:        0,
+			TLSConfig: tls_config,
 		})
 		fmt.Println("redis configured")
 		http.HandleFunc("/write", writeRedis)
