@@ -21,6 +21,7 @@ func main() {
 	db_type := os.Getenv("DEMO_APP_DB_TYPE")
 
 	if db_type == "mysql" {
+		fmt.Println("mysql being configured")
 		hostname := os.Getenv("DEMO_APP_MYSQL_HOSTNAME")
 		database := os.Getenv("DEMO_APP_MYSQL_DATABASE")
 		username := os.Getenv("DEMO_APP_MYSQL_USERNAME")
@@ -43,12 +44,13 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-
+		fmt.Println("mysql configured")
 		http.HandleFunc("/write", writeMysql)
 		log.Fatal(http.ListenAndServe(":8080", nil))
 	}
 
 	if db_type == "redis" {
+		fmt.Println("redis being configured")
 		hostname := os.Getenv("DEMO_APP_REDIS_HOSTNAME")
 		port := os.Getenv("DEMO_APP_REDIS_PORT")
 		password := os.Getenv("DEMO_APP_REDIS_PASSWORD")
@@ -58,6 +60,7 @@ func main() {
 			Password: password,
 			DB:       0,
 		})
+		fmt.Println("redis configured")
 		http.HandleFunc("/write", writeRedis)
 		log.Fatal(http.ListenAndServe(":8080", nil))
 	}
@@ -65,7 +68,7 @@ func main() {
 }
 
 func writeMysql(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("write entered")
+	fmt.Println("mysql write entered")
 
 	petname := "puppyface"
 
@@ -80,9 +83,12 @@ func writeMysql(w http.ResponseWriter, r *http.Request) {
 }
 
 func writeRedis(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("redis write entered")
 	petname := "puppyface"
+	fmt.Println("about to write to redis")
 	err := redis_client.Set("favorite-pet", petname, 0).Err()
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("wrote to redis")
 }
