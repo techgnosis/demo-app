@@ -16,7 +16,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-var db *sql.DB
+var mysql_client *sql.DB
 
 var redis_client *redis.Client
 
@@ -38,16 +38,16 @@ func main() {
 		connectionString := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", username, password, hostname, database)
 		log.Println("connectionString: " + connectionString)
 		var err error
-		db, err = sql.Open("mysql", connectionString)
+		mysql_client, err = sql.Open("mysql", connectionString)
 		if err != nil {
 			log.Fatalf("sql.Open error: %v", err)
 		}
-		err = db.Ping()
+		err = mysql_client.Ping()
 		if err != nil {
 			log.Fatalf("db.Ping error: %v", err)
 		}
 
-		_, err = db.Exec("CREATE TABLE IF NOT EXISTS pet ( id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, name VARCHAR(30) NOT NULL)")
+		_, err = mysql_client.Exec("CREATE TABLE IF NOT EXISTS pet ( id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, name VARCHAR(30) NOT NULL)")
 		if err != nil {
 			log.Fatalf("failed to create table: %v", err)
 		}
@@ -109,7 +109,7 @@ func writeMysql(w http.ResponseWriter, r *http.Request) {
 
 	petname := "puppyface"
 	sql_statement := fmt.Sprintf("insert into pet (name) values ('%s')", petname)
-	_, err := db.Exec(sql_statement)
+	_, err := mysql_client.Exec(sql_statement)
 	if err != nil {
 		log.Printf("error inserting row: %v", err)
 	}
