@@ -90,9 +90,8 @@ func main() {
 		var err error
 
 		postgres_client, err = pgx.Connect(context.Background(), connectionString)
-
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("failed to create postgres client: %v", err)
 		}
 		defer postgres_client.Close(context.Background())
 		log.Println("postgres configured")
