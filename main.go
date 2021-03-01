@@ -27,6 +27,8 @@ func main() {
 
 	db_type := os.Getenv("DEMO_APP_DB_TYPE")
 
+	var write_func func(http.ResponseWriter, *http.Request)
+
 	if db_type == "mysql" {
 		log.Println("mysql mode")
 		hostname := os.Getenv("DEMO_APP_MYSQL_HOSTNAME")
@@ -38,21 +40,20 @@ func main() {
 		var err error
 		db, err = sql.Open("mysql", connectionString)
 		if err != nil {
-			log.Println("sql.Open error")
-			panic(err.Error())
+			log.Fatalf("sql.Open error: %v", err)
 		}
 		err = db.Ping()
 		if err != nil {
-			log.Println("db.Ping error")
-			panic(err.Error())
+			log.Fatalf("db.Ping error: %v", err)
 		}
 
 		_, err = db.Exec("CREATE TABLE IF NOT EXISTS pet ( id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, name VARCHAR(30) NOT NULL)")
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("failed to create table: %v", err)
 		}
 		log.Println("mysql configured")
-		http.HandleFunc("/write", writeMysql)
+		write_func = writeMysql
+
 	}
 
 	if db_type == "redis" {
@@ -70,12 +71,12 @@ func main() {
 			TLSConfig: tls_config,
 		})
 		log.Println("redis configured")
-		http.HandleFunc("/write", writeRedis)
+		write_func = writeRedis
 	}
 
 	if db_type == "test" {
 		log.Println("test mode")
-		http.HandleFunc("/write", writeTestmode)
+		write_func = writeTestmode
 	}
 
 	if db_type == "postgres" {
@@ -94,49 +95,45 @@ func main() {
 			log.Fatal(err)
 		}
 		defer postgres_client.Close(context.Background())
-		http.HandleFunc("/write", writePostgres)
+		log.Println("postgres configured")
+		write_func = writePostgres
 	}
 
+	http.HandleFunc("/write", write_func)
 	http.Handle("/metrics", promhttp.Handler())
 	log.Fatal(http.ListenAndServe(":8080", nil))
 
 }
 
 func writeMysql(w http.ResponseWriter, r *http.Request) {
-	log.Println("mysql write entered")
 
 	petname := "puppyface"
-
-	log.Println("About to write a row")
 	sql_statement := fmt.Sprintf("insert into pet (name) values ('%s')", petname)
 	_, err := db.Exec(sql_statement)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("error inserting row: %v", err)
 	}
-	log.Println("wrote a row")
+	log.Println("wrote to mysql")
 
 }
 
 func writeRedis(w http.ResponseWriter, r *http.Request) {
-	log.Println("redis write entered")
+
 	petname := "puppyface"
-	log.Println("about to write to redis")
 	err := redis_client.Set("favorite-pet", petname, 0).Err()
 	if err != nil {
-		panic(err)
+		log.Printf("error inserting row: %v", err)
 	}
 	log.Println("wrote to redis")
 }
 
 func writePostgres(w http.ResponseWriter, r *http.Request) {
-	log.Println("postgres write entered")
-	var greeting string
 
+	var greeting string
 	err := postgres_client.QueryRow(context.Background(), "select 'Hello, world!'").Scan(&greeting)
 	if err != nil {
-		panic(err)
+		log.Printf("error inserting row: %v", err)
 	}
-	log.Println(greeting)
 	log.Println("wrote to postgres kinda")
 }
 
