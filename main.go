@@ -13,6 +13,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jackc/pgx/v4"
 
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -21,6 +22,15 @@ var mysql_client *sql.DB
 var redis_client *redis.Client
 
 var postgres_client *pgx.Conn
+
+var (
+	test_writes = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "demo_app_test_writes",
+			Help: "The total number of /write invocations while in test mode",
+		},
+	)
+)
 
 func main() {
 	log.Println("App launched")
@@ -76,6 +86,7 @@ func main() {
 
 	if db_type == "test" {
 		log.Println("test mode")
+		prometheus.MustRegister(test_writes)
 		write_func = writeTestmode
 	}
 
@@ -138,4 +149,5 @@ func writePostgres(w http.ResponseWriter, r *http.Request) {
 
 func writeTestmode(w http.ResponseWriter, r *http.Request) {
 	log.Println("test write")
+	test_writes.Inc()
 }
