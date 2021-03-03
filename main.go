@@ -37,7 +37,7 @@ var curl_response string
 
 func main() {
 	log.Println("App launched")
-	curl_response = "3/2 5:07pm"
+	curl_response = "3/2 5:07pm\n"
 
 	db_type := os.Getenv("DEMO_APP_DB_TYPE")
 
