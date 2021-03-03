@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"database/sql"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -32,8 +33,11 @@ var (
 	)
 )
 
+var curl_response string
+
 func main() {
 	log.Println("App launched")
+	curl_response = "3/2 5:07pm"
 
 	db_type := os.Getenv("DEMO_APP_DB_TYPE")
 
@@ -124,6 +128,7 @@ func writeMysql(w http.ResponseWriter, r *http.Request) {
 		log.Printf("error inserting row: %v", err)
 	}
 	log.Println("wrote to mysql")
+	io.WriteString(w, curl_response)
 
 }
 
@@ -150,4 +155,5 @@ func writePostgres(w http.ResponseWriter, r *http.Request) {
 func writeTestmode(w http.ResponseWriter, r *http.Request) {
 	log.Println("test write")
 	test_writes.Inc()
+	io.WriteString(w, curl_response)
 }
