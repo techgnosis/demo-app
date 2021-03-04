@@ -18,26 +18,36 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+// DB clients
 var mysql_client *sql.DB
-
 var redis_client *redis.Client
-
 var postgres_client *pgx.Conn
 
-var (
-	test_writes = prometheus.NewCounter(
-		prometheus.CounterOpts{
-			Name: "demo_app_test_writes",
-			Help: "The total number of /write invocations while in test mode",
-		},
-	)
-)
+// Prometheus metrics
+var db_writes = prometheus.NewCounter(
+	prometheus.CounterOpts{
+		Name: "demoapp_writes",
+		Help: "The total number of /write invocations",
+	})
 
+var db_write_times = prometheus.NewHistogram(
+	prometheus.HistogramOpts{
+		Name: "demoapp_writes_times",
+		Help: "Response times for the /write invocations",
+	})
+
+// Other globals
 var curl_response string
 
 func main() {
 	log.Println("App launched")
+
+	// This is the line to change in a TBS demo
+	// Easy to show with curl that the new app has deployed
 	curl_response = "3/2 5:07pm\n"
+
+	prometheus.MustRegister(db_writes)
+	prometheus.MustRegister(db_write_times)
 
 	db_type := os.Getenv("DEMO_APP_DB_TYPE")
 
@@ -90,7 +100,7 @@ func main() {
 
 	if db_type == "test" {
 		log.Println("test mode")
-		prometheus.MustRegister(test_writes)
+
 		write_func = writeTestmode
 	}
 
@@ -127,6 +137,7 @@ func writeMysql(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("error inserting row: %v", err)
 	}
+	db_writes.Inc()
 	log.Println("wrote to mysql")
 	io.WriteString(w, curl_response)
 
@@ -139,6 +150,7 @@ func writeRedis(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("error inserting row: %v", err)
 	}
+	db_writes.Inc()
 	log.Println("wrote to redis")
 }
 
@@ -149,11 +161,14 @@ func writePostgres(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("error inserting row: %v", err)
 	}
+	db_writes.Inc()
 	log.Println("wrote to postgres kinda")
 }
 
 func writeTestmode(w http.ResponseWriter, r *http.Request) {
+	timer := prometheus.NewTimer(db_write_times)
+	defer timer.ObserveDuration()
 	log.Println("test write")
-	test_writes.Inc()
+	db_writes.Inc()
 	io.WriteString(w, curl_response)
 }
