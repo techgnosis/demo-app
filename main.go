@@ -42,10 +42,6 @@ var curl_response string
 func main() {
 	log.Println("App launched")
 
-	// This is the line to change in a TBS demo
-	// Easy to show with curl that the new app has deployed
-	curl_response = "3/2 5:07pm\n"
-
 	prometheus.MustRegister(db_writes)
 	prometheus.MustRegister(db_write_times)
 
@@ -138,8 +134,9 @@ func writeMysql(w http.ResponseWriter, r *http.Request) {
 		log.Printf("error inserting row: %v", err)
 	}
 	db_writes.Inc()
-	log.Println("wrote to mysql")
-	io.WriteString(w, curl_response)
+	message := "mysql write success"
+	log.Println(message)
+	io.WriteString(w, message)
 
 }
 
@@ -162,13 +159,16 @@ func writePostgres(w http.ResponseWriter, r *http.Request) {
 		log.Printf("error inserting row: %v", err)
 	}
 	db_writes.Inc()
-	log.Println("wrote to postgres kinda")
+	message := "wrote to postgres kinda"
+	log.Println(message)
+	io.WriteString(w, message)
 }
 
 func writeTestmode(w http.ResponseWriter, r *http.Request) {
 	timer := prometheus.NewTimer(db_write_times)
 	defer timer.ObserveDuration()
-	log.Println("test write")
 	db_writes.Inc()
-	io.WriteString(w, curl_response)
+	message := "test write success"
+	log.Println(message)
+	io.WriteString(w, message)
 }
