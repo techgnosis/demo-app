@@ -34,8 +34,9 @@ var db_writes = prometheus.NewCounter(
 
 var db_write_times = prometheus.NewHistogram(
 	prometheus.HistogramOpts{
-		Name: "demoapp_writes_times",
-		Help: "Response times for the /write invocations",
+		Name:    "demoapp_writes_times",
+		Help:    "Response times for the /write invocations",
+		Buckets: prometheus.LinearBuckets(.1, .1, 10),
 	})
 
 // Other globals
@@ -172,7 +173,7 @@ func writeTestmode(w http.ResponseWriter, r *http.Request) {
 	db_writes.Inc()
 	message := "test write success\n"
 	log.Println(message)
-	random_number := rand.Intn(100)
+	random_number := rand.Intn(1000)
 	time.Sleep(time.Duration(random_number) * time.Millisecond)
 	io.WriteString(w, message)
 }
