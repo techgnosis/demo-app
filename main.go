@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-redis/redis/v7"
 	_ "github.com/go-sql-driver/mysql"
@@ -134,7 +136,7 @@ func writeMysql(w http.ResponseWriter, r *http.Request) {
 		log.Printf("error inserting row: %v", err)
 	}
 	db_writes.Inc()
-	message := "mysql write success"
+	message := "mysql write success\n"
 	log.Println(message)
 	io.WriteString(w, message)
 
@@ -159,7 +161,7 @@ func writePostgres(w http.ResponseWriter, r *http.Request) {
 		log.Printf("error inserting row: %v", err)
 	}
 	db_writes.Inc()
-	message := "wrote to postgres kinda"
+	message := "wrote to postgres kinda\n"
 	log.Println(message)
 	io.WriteString(w, message)
 }
@@ -168,7 +170,9 @@ func writeTestmode(w http.ResponseWriter, r *http.Request) {
 	timer := prometheus.NewTimer(db_write_times)
 	defer timer.ObserveDuration()
 	db_writes.Inc()
-	message := "test write success"
+	message := "test write success\n"
 	log.Println(message)
+	random_number := rand.Intn(100)
+	time.Sleep(time.Duration(random_number) * time.Millisecond)
 	io.WriteString(w, message)
 }
