@@ -133,9 +133,8 @@ func writeMysql(w http.ResponseWriter, r *http.Request) {
 	defer timer.ObserveDuration()
 
 	// 100 + rand(50)
-	time.Sleep(time.Duration(100) * time.Millisecond)
 	random_number := rand.Intn(50)
-	time.Sleep(time.Duration(random_number) * time.Millisecond)
+	time.Sleep(time.Duration(100+random_number) * time.Millisecond)
 
 	petname := "puppyface"
 	sql_statement := fmt.Sprintf("insert into pet (name) values ('%s')", petname)
@@ -183,9 +182,8 @@ func writeTestmode(w http.ResponseWriter, r *http.Request) {
 	log.Println(message)
 
 	// 100 + rand(50)
-	time.Sleep(time.Duration(100) * time.Millisecond)
 	random_number := rand.Intn(50)
-	time.Sleep(time.Duration(random_number) * time.Millisecond)
+	time.Sleep(time.Duration(100+random_number) * time.Millisecond)
 
 	io.WriteString(w, message)
 }
