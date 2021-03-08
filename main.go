@@ -129,6 +129,8 @@ func main() {
 
 func writeMysql(w http.ResponseWriter, r *http.Request) {
 
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(db_write_times.Set))
+	defer timer.ObserveDuration()
 	petname := "puppyface"
 	sql_statement := fmt.Sprintf("insert into pet (name) values ('%s')", petname)
 	_, err := mysql_client.Exec(sql_statement)
