@@ -32,11 +32,10 @@ var db_writes = prometheus.NewCounter(
 		Help: "The total number of /write invocations",
 	})
 
-var db_write_times = prometheus.NewHistogram(
-	prometheus.HistogramOpts{
-		Name:    "demoapp_writes_times",
-		Help:    "Response times for the /write invocations",
-		Buckets: prometheus.LinearBuckets(.1, .1, 10),
+var db_write_times = prometheus.NewGauge(
+	prometheus.GaugeOpts{
+		Name: "demoapp_writes_responsetime",
+		Help: "Latency for the /write endpoint",
 	})
 
 // Other globals
@@ -168,7 +167,7 @@ func writePostgres(w http.ResponseWriter, r *http.Request) {
 }
 
 func writeTestmode(w http.ResponseWriter, r *http.Request) {
-	timer := prometheus.NewTimer(db_write_times)
+	timer := prometheus.NewTimer(prometheus.ObserverFunc(db_write_times.Set))
 	defer timer.ObserveDuration()
 	db_writes.Inc()
 	message := "test write success\n"
