@@ -131,8 +131,12 @@ func writeMysql(w http.ResponseWriter, r *http.Request) {
 
 	timer := prometheus.NewTimer(prometheus.ObserverFunc(db_write_times.Set))
 	defer timer.ObserveDuration()
-	random_number := rand.Intn(1000)
+
+	// 100 + rand(50)
+	time.Sleep(time.Duration(100) * time.Millisecond)
+	random_number := rand.Intn(50)
 	time.Sleep(time.Duration(random_number) * time.Millisecond)
+
 	petname := "puppyface"
 	sql_statement := fmt.Sprintf("insert into pet (name) values ('%s')", petname)
 	_, err := mysql_client.Exec(sql_statement)
@@ -173,10 +177,15 @@ func writePostgres(w http.ResponseWriter, r *http.Request) {
 func writeTestmode(w http.ResponseWriter, r *http.Request) {
 	timer := prometheus.NewTimer(prometheus.ObserverFunc(db_write_times.Set))
 	defer timer.ObserveDuration()
+
 	db_writes.Inc()
 	message := "test write success\n"
 	log.Println(message)
-	random_number := rand.Intn(1000)
+
+	// 100 + rand(50)
+	time.Sleep(time.Duration(100) * time.Millisecond)
+	random_number := rand.Intn(50)
 	time.Sleep(time.Duration(random_number) * time.Millisecond)
+
 	io.WriteString(w, message)
 }
