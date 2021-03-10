@@ -42,7 +42,7 @@ var db_write_times = prometheus.NewGauge(
 var curl_response string
 
 func main() {
-	log.Println("App launched")
+	log.Println("App launched!!")
 
 	prometheus.MustRegister(db_writes)
 	prometheus.MustRegister(db_write_times)
