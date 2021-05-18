@@ -12,5 +12,5 @@ The goal of this repo is to be a single Golang app that I can use for any learni
 * log some information
 * output prometheus metrics
 
-
+Hello Micron!
 
